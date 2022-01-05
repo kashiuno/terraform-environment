@@ -39,36 +39,6 @@ resource "kubernetes_namespace" "gitlab-namespace" {
   }
 }
 
-resource "kubernetes_persistent_volume" "gitlab-db-pv" {
-  metadata {
-    name = "gitlab-db-pv"
-  }
-  spec {
-    capacity = {
-      storage = var.gitlab-db-capacity
-    }
-    access_modes                     = ["ReadWriteOnce"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = var.local-storage-class-name
-    persistent_volume_source {
-      local {
-        path = "/home/persistenceVolumes/gitlab-pg-data"
-      }
-    }
-    node_affinity {
-      required {
-        node_selector_term {
-          match_expressions {
-            key      = "isStorage"
-            operator = "In"
-            values   = ["true"]
-          }
-        }
-      }
-    }
-  }
-}
-
 resource "kubernetes_service" "gitlab-postgres-svc" {
   metadata {
     name = "gitlab-pg-svc"
@@ -154,7 +124,7 @@ resource "kubernetes_stateful_set" "gitlab-postgres" {
             exec {
               command = ["/bin/sh", "-c", "exec pg_isready -U \"postgres\" -h 127.0.0.1 -p 5432"]
             }
-            failure_threshold    = 6
+            failure_threshold     = 6
             initial_delay_seconds = 30
             period_seconds        = 10
             success_threshold     = 1
@@ -164,7 +134,7 @@ resource "kubernetes_stateful_set" "gitlab-postgres" {
             exec {
               command = ["/bin/sh", "-c", "exec pg_isready -U \"postgres\" -h 127.0.0.1 -p 5432"]
             }
-            failure_threshold    = 6
+            failure_threshold     = 6
             initial_delay_seconds = 5
             period_seconds        = 10
             success_threshold     = 1
@@ -196,7 +166,7 @@ resource "kubernetes_stateful_set" "gitlab-postgres" {
       }
       spec {
         access_modes       = ["ReadWriteOnce"]
-        storage_class_name = var.local-storage-class-name
+        storage_class_name = var.nfs-storage-class-name
         resources {
           requests = {
             storage = var.gitlab-db-capacity
