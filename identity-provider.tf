@@ -264,6 +264,36 @@ resource "kubernetes_deployment" "identity-provider" {
             value = var.identity-provider-admin-password
           }
 
+          env {
+            name  = "KC_DB_URL_HOST"
+            value = var.identity-provider-pg-service-name
+          }
+
+          env {
+            name  = "KC_DB"
+            value = "postgres"
+          }
+
+          env {
+            name  = "KC_DB_PASSWORD"
+            value = var.identity-provider-db-password
+          }
+
+          env {
+            name  = "KC_DB_USERNAME"
+            value = var.identity-provider-db-username
+          }
+
+          env {
+            name  = "KC_DB_URL_DATABASE"
+            value = var.identity-provider-db-name
+          }
+
+          env {
+            name  = "KC_PROXY"
+            value = "edge"
+          }
+
           readiness_probe {
             http_get {
               path = "/realms/master"
