@@ -45,4 +45,14 @@ resource "helm_release" "nginx_ingress" {
     name  = "controller.ingressClass"
     value = var.ingress-class-name
   }
+
+  set {
+    name  = "controller.config.entries.proxy-buffers"
+    value = "8 16k"
+  }
+
+  set {
+    name  = "controller.config.entries.proxy-buffer-size"
+    value = "16k"
+  }
 }
