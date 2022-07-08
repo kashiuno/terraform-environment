@@ -23,6 +23,8 @@ There is a nginx implementation of ingress. Node ports are used for get traffic 
 
 1. Pack all sensitive information to k8s secrets
 2. Check places and pack values to variabe where needed
+3. Merge all database instances to one
+4. Come up with backups for databases
 
 ## Terraform variables
 
