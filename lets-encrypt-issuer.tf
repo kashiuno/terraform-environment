@@ -4,7 +4,7 @@ variable "lets-encrypt-email" {
 }
 
 variable "lets-encrypt-acme-server" {
-  type = string
+  type    = string
   default = "https://acme-staging-v02.api.letsencrypt.org/directory"
 }
 
