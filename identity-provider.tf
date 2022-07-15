@@ -339,7 +339,7 @@ resource "kubernetes_ingress_v1" "identity-provider-ingress" {
       host = var.identity-provider-host
       http {
         path {
-          path      = "/"
+          path      = "/realms/Bookkeeping"
           path_type = "Prefix"
           backend {
             service {
