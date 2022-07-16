@@ -197,6 +197,30 @@ resource "kubernetes_ingress_v1" "identity-provider-ingress" {
             }
           }
         }
+        path {
+          path      = "/resources"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = var.identity-provider-keycloak-service-name
+              port {
+                number = 8080
+              }
+            }
+          }
+        }
+        path {
+          path      = "/js"
+          path_type = "Prefix"
+          backend {
+            service {
+              name = var.identity-provider-keycloak-service-name
+              port {
+                number = 8080
+              }
+            }
+          }
+        }
       }
     }
   }
