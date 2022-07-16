@@ -14,11 +14,6 @@ There is a nginx implementation of ingress. Node ports are used for get traffic 
 
 1. All names for terraform resources have to be splitted by dash.
 
-## Problems
-
-1. There is a problem with deleting resource with PVC. PV don't want to be deleted.
-2. There is a problem with connecting to web interface of keycloak
-
 ## Improvements
 
 1. Pack all sensitive information to k8s secrets
@@ -29,11 +24,14 @@ There is a nginx implementation of ingress. Node ports are used for get traffic 
 
 ### Obligatory
 
-1. gitlab-db-username - gitlab database superuser
-2. gitlab-db-password - gitlab database superuser password
+1. postgres-admin-username - database superuser
+2. postgres-admin-password - database superuser password
 3. nfs-host - host for connecting to nfs for PV provision
-4. identity-provider-db-username - identity provider database superuser
-5. identity-provider-db-password - identity provider database superuser password
+4. identity-provider-db-username - identity provider database user
+5. identity-provider-db-password - identity provider database user password
 6. identity-provider-admin-password - identity provider initial admin password
 7. identity-provider-admin-login - identity provider initial admin login
 8. lets-encrypt-email - email for certificates provision
+9. gitlab-db-username - gitlab database user
+10. gitlab-db-password - gitlab database password
+11. database-host - external host of database(almost external - router don't have port-forwarding to it)
