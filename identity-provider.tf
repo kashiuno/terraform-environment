@@ -3,11 +3,6 @@ variable "identity-provider-namespace" {
   default = "identity-provider"
 }
 
-variable "identity-provider-pg-service-name" {
-  type    = string
-  default = "identity-provider-pg-svc"
-}
-
 variable "identity-provider-keycloak-service-name" {
   type    = string
   default = "identity-provider-keycloak-svc"
@@ -28,16 +23,6 @@ variable "identity-provider-db-name" {
   default = "identity-provider"
 }
 
-variable "identity-provider-db-capacity" {
-  type    = string
-  default = "20Gi"
-}
-
-variable "identity-provider-postgres-pvc-name" {
-  type    = string
-  default = "identity-provider-pvc"
-}
-
 variable "identity-provider-admin-password" {
   type      = string
   sensitive = true
@@ -56,144 +41,6 @@ variable "identity-provider-host" {
 resource "kubernetes_namespace" "identity-provider-namespace" {
   metadata {
     name = var.identity-provider-namespace
-  }
-}
-
-resource "kubernetes_service" "identity-provider-postgres-svc" {
-  metadata {
-    name = "identity-provider-pg-svc"
-    labels = {
-      app = "identity-provider"
-      run = "postgres"
-    }
-    namespace = var.identity-provider-namespace
-  }
-  spec {
-    selector = {
-      app = "identity-provider"
-      run = "postgres"
-      pod = "true"
-    }
-    cluster_ip = "None"
-    port {
-      port        = 5432
-      target_port = 5432
-    }
-  }
-}
-
-resource "kubernetes_stateful_set" "identity-provider-postgres" {
-  metadata {
-    name = "identity-provider-pg"
-    labels = {
-      app = "identity-provider"
-      run = "postgres"
-    }
-    namespace = var.identity-provider-namespace
-  }
-  spec {
-    replicas = 1
-    selector {
-      match_labels = {
-        app = "identity-provider"
-        run = "postgres"
-        pod = "true"
-      }
-    }
-    service_name = var.identity-provider-pg-service-name
-    template {
-      metadata {
-        name = "identity-provider-pg-pod"
-        labels = {
-          app = "identity-provider"
-          run = "postgres"
-          pod = "true"
-        }
-      }
-      spec {
-        container {
-          name  = "postgres"
-          image = "postgres:13"
-          env {
-            name  = "POSTGRES_PASSWORD"
-            value = var.identity-provider-db-password
-          }
-          env {
-            name  = "POSTGRES_USER"
-            value = var.identity-provider-db-username
-          }
-          env {
-            name  = "POSTGRES_DB"
-            value = var.identity-provider-db-name
-          }
-          volume_mount {
-            mount_path = "/var/lib/postgresql/data"
-            name       = var.identity-provider-postgres-pvc-name
-          }
-          resources {
-            requests = {
-              memory = "256Mi"
-              cpu    = "250m"
-            }
-            limits = {
-              memory = "256Mi"
-              cpu    = "250m"
-            }
-          }
-          liveness_probe {
-            exec {
-              command = ["/bin/sh", "-c", "exec pg_isready -U \"postgres\" -h 127.0.0.1 -p 5432"]
-            }
-            failure_threshold     = 6
-            initial_delay_seconds = 30
-            period_seconds        = 10
-            success_threshold     = 1
-            timeout_seconds       = 5
-          }
-          readiness_probe {
-            exec {
-              command = ["/bin/sh", "-c", "exec pg_isready -U \"postgres\" -h 127.0.0.1 -p 5432"]
-            }
-            failure_threshold     = 6
-            initial_delay_seconds = 5
-            period_seconds        = 10
-            success_threshold     = 1
-            timeout_seconds       = 5
-          }
-        }
-        affinity {
-          node_affinity {
-            required_during_scheduling_ignored_during_execution {
-              node_selector_term {
-                match_expressions {
-                  key      = "isStorage"
-                  operator = "In"
-                  values   = ["true"]
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-    volume_claim_template {
-      metadata {
-        name = var.identity-provider-postgres-pvc-name
-        labels = {
-          app = "identity-provider"
-          run = "postgres"
-        }
-      }
-      spec {
-        access_modes       = ["ReadWriteOnce"]
-        storage_class_name = var.nfs-storage-class-name
-        resources {
-          requests = {
-            storage = var.identity-provider-db-capacity
-          }
-        }
-      }
-    }
   }
 }
 
@@ -266,7 +113,7 @@ resource "kubernetes_deployment" "identity-provider" {
 
           env {
             name  = "KC_DB_URL_HOST"
-            value = var.identity-provider-pg-service-name
+            value = "postgres-external-service.database"
           }
 
           env {
@@ -353,4 +200,18 @@ resource "kubernetes_ingress_v1" "identity-provider-ingress" {
       }
     }
   }
+}
+
+resource "postgresql_role" "keycloak-user" {
+  name     = var.identity-provider-db-username
+  login    = true
+  password = var.identity-provider-db-password
+}
+
+resource "postgresql_database" "keycloak-database" {
+  name  = var.identity-provider-db-name
+  owner = var.identity-provider-db-username
+  depends_on = [
+    postgresql_role.keycloak-user
+  ]
 }
