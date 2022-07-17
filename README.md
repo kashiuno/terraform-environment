@@ -35,3 +35,6 @@ There is a nginx implementation of ingress. Node ports are used for get traffic 
 9. gitlab-db-username - gitlab database user
 10. gitlab-db-password - gitlab database password
 11. database-host - external host of database(almost external - router don't have port-forwarding to it)
+12. redis-password - password for connections to redis
+13. minio-admin-user - minio initial user login
+14. minio-admin-pass - minio initial user password
