@@ -49,10 +49,17 @@ resource "kubernetes_service" "minio-svc" {
       run = "minio"
       pod = "true"
     }
-    type = "ClusterIP"
+    type       = "ClusterIP"
+    cluster_ip = "None"
     port {
+      name        = "api"
       port        = 9000
       target_port = 9000
+    }
+    port {
+      name        = "panel"
+      port        = 9090
+      target_port = 9090
     }
   }
 }
@@ -87,10 +94,10 @@ resource "kubernetes_stateful_set" "minio" {
       }
       spec {
         container {
-          name  = "minio"
-          image = "quay.io/minio/minio:RELEASE.2022-07-08T00-05-23Z.fips"
+          name    = "minio"
+          image   = "quay.io/minio/minio:RELEASE.2022-07-08T00-05-23Z.fips"
           command = ["/bin/bash", "-c"]
-          args = [ "minio server /data " ]
+          args    = ["minio server /data --console-address \":9090\""]
           env {
             name  = "MINIO_ROOT_USER"
             value = var.minio-admin-user
