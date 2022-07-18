@@ -50,6 +50,9 @@ resource "kubernetes_service" "redis-svc" {
       target_port = 6379
     }
   }
+  depends_on = [
+    kubernetes_namespace.key-value-storage-namespace
+  ]
 }
 
 resource "kubernetes_stateful_set" "redis" {
@@ -154,4 +157,7 @@ resource "kubernetes_stateful_set" "redis" {
       }
     }
   }
+  depends_on = [
+    kubernetes_namespace.key-value-storage-namespace
+  ]
 }

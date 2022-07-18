@@ -62,6 +62,9 @@ resource "kubernetes_service" "minio-svc" {
       target_port = 9090
     }
   }
+  depends_on = [
+    kubernetes_namespace.object-storage-namespace
+  ]
 }
 
 resource "kubernetes_stateful_set" "minio" {
@@ -179,4 +182,7 @@ resource "kubernetes_stateful_set" "minio" {
       }
     }
   }
+  depends_on = [
+    kubernetes_namespace.object-storage-namespace
+  ]
 }
