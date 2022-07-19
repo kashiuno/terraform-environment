@@ -49,17 +49,18 @@ resource "kubernetes_service" "minio-svc" {
       run = "minio"
       pod = "true"
     }
-    type       = "ClusterIP"
-    cluster_ip = "None"
+    type = "NodePort"
     port {
       name        = "api"
       port        = 9000
       target_port = 9000
+      node_port   = 30900
     }
     port {
       name        = "panel"
       port        = 9090
       target_port = 9090
+      node_port   = 30909
     }
   }
   depends_on = [
