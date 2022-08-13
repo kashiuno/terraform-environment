@@ -5,7 +5,32 @@ variable "lets-encrypt-email" {
 
 variable "lets-encrypt-acme-server" {
   type    = string
+  default = "https://acme-v02.api.letsencrypt.org/directory"
+}
+
+variable "lets-encrypt-acme-server-staging" {
+  type    = string
   default = "https://acme-staging-v02.api.letsencrypt.org/directory"
+}
+
+variable "lets-encrypt-issuer-name-staging" {
+  type    = string
+  default = "lets-encrypt-issuer-staging"
+}
+
+variable "lets-encrypt-issuer-name" {
+  type    = string
+  default = "lets-encrypt-issuer"
+}
+
+variable "lets-encrypt-secret-name" {
+  type    = string
+  default = "letsencrypt"
+}
+
+variable "lets-encrypt-secret-name-staging" {
+  type    = string
+  default = "letsencrypt-staging"
 }
 
 resource "kubernetes_manifest" "lets-encrypt-issuer" {
@@ -13,14 +38,14 @@ resource "kubernetes_manifest" "lets-encrypt-issuer" {
     apiVersion = "cert-manager.io/v1"
     kind       = "ClusterIssuer"
     metadata = {
-      name = "lets-encrypt-issuer"
+      name = var.lets-encrypt-issuer-name
     }
     spec = {
       acme = {
         server = var.lets-encrypt-acme-server
         email  = var.lets-encrypt-email
         privateKeySecretRef = {
-          name = "letsencrypt"
+          name = var.lets-encrypt-secret-name
         }
 
         solvers = [
@@ -36,4 +61,40 @@ resource "kubernetes_manifest" "lets-encrypt-issuer" {
       }
     }
   }
+  depends_on = [
+    helm_release.cert-manager
+  ]
+}
+
+resource "kubernetes_manifest" "lets-encrypt-issuer-staging" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = var.lets-encrypt-issuer-name-staging
+    }
+    spec = {
+      acme = {
+        server = var.lets-encrypt-acme-server-staging
+        email  = var.lets-encrypt-email
+        privateKeySecretRef = {
+          name = var.lets-encrypt-secret-name-staging
+        }
+
+        solvers = [
+          {
+            http01 = {
+              ingress = {
+                class       = var.ingress-class-name
+                serviceType = "ClusterIP"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+  depends_on = [
+    helm_release.cert-manager
+  ]
 }
