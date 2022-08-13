@@ -38,3 +38,13 @@ There is a nginx implementation of ingress. Node ports are used for get traffic 
 12. redis-password - password for connections to redis
 13. minio-admin-user - minio initial user login
 14. minio-admin-pass - minio initial user password
+
+## Cluster
+
+Container runtime - containerd
+
+### Versions
+1. Flannel - 0.14.1 - https://raw.githubusercontent.com/flannel-io/flannel/v0.14.1/Documentation/kube-flannel.yml
+2. kubectl - 1.22.4
+3. kubeadm - 1.22.4
+4. kubelet - 1.22.4
