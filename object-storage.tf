@@ -184,6 +184,7 @@ resource "kubernetes_stateful_set" "minio" {
     }
   }
   depends_on = [
-    kubernetes_namespace.object-storage-namespace
+    kubernetes_namespace.object-storage-namespace,
+    helm_release.nfs-provisioner
   ]
 }

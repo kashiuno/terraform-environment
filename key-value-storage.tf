@@ -158,6 +158,7 @@ resource "kubernetes_stateful_set" "redis" {
     }
   }
   depends_on = [
-    kubernetes_namespace.key-value-storage-namespace
+    kubernetes_namespace.key-value-storage-namespace,
+    helm_release.nfs-provisioner
   ]
 }

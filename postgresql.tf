@@ -168,4 +168,8 @@ resource "kubernetes_stateful_set" "postgres-stateful-set" {
       }
     }
   }
+  depends_on = [
+    helm_release.nfs-provisioner,
+    kubernetes_namespace.database-namespace
+  ]
 }
