@@ -134,18 +134,10 @@ resource "kubernetes_stateful_set" "postgres-stateful-set" {
             timeout_seconds       = 5
           }
         }
-        affinity {
-          node_affinity {
-            required_during_scheduling_ignored_during_execution {
-              node_selector_term {
-                match_expressions {
-                  key      = "isStorage"
-                  operator = "In"
-                  values   = ["true"]
-                }
-              }
-            }
-          }
+        toleration {
+          key      = "storage"
+          operator = "Exists"
+          effect   = "NoSchedule"
         }
       }
     }
