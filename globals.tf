@@ -32,3 +32,13 @@ variable "lets-encrypt-secret-name-staging" {
   type    = string
   default = "letsencrypt-staging"
 }
+
+variable "lets-encrypt-issuer-name" {
+  type    = string
+  default = "lets-encrypt-issuer"
+}
+
+variable "lets-encrypt-secret-name" {
+  type    = string
+  default = "letsencrypt"
+}
