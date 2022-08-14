@@ -25,7 +25,7 @@ variable "postgres-pvc-name" {
 
 variable "postgres-capacity" {
   type    = string
-  default = "100Gi"
+  default = "50Gi"
 }
 
 resource "kubernetes_namespace" "database-namespace" {
