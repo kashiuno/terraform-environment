@@ -11,6 +11,26 @@ variable "minio-endpoint" {
   type = string
 }
 
+variable "postgres-admin-password" {
+  type      = string
+  sensitive = true
+}
+
+variable "postgres-admin-username" {
+  type      = string
+  sensitive = true
+}
+
+variable "minio-admin-user" {
+  type      = string
+  sensitive = true
+}
+
+variable "minio-admin-pass" {
+  type      = string
+  sensitive = true
+}
+
 terraform {
   required_providers {
     postgresql = {

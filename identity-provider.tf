@@ -233,7 +233,6 @@ resource "postgresql_role" "keycloak-user" {
   name       = var.identity-provider-db-username
   login      = true
   password   = var.identity-provider-db-password
-  depends_on = [kubernetes_stateful_set.postgres-stateful-set]
 }
 
 resource "postgresql_database" "keycloak-database" {
