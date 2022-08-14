@@ -141,8 +141,13 @@ resource "helm_release" "gitlab" {
 
   # Shell
   set {
-    name  = "gitlab.gitlab-shell.enabled"
-    value = false
+    name  = "gitlab.gitlab-shell.service.type"
+    value = "NodePort"
+  }
+
+  set {
+    name  = "gitlab.gitlab-shell.service.nodePort"
+    value = 30022
   }
 
   # Grafana
