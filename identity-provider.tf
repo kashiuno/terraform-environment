@@ -230,16 +230,16 @@ resource "kubernetes_ingress_v1" "identity-provider-ingress" {
 }
 
 resource "postgresql_role" "keycloak-user" {
-  name     = var.identity-provider-db-username
-  login    = true
-  password = var.identity-provider-db-password
+  name       = var.identity-provider-db-username
+  login      = true
+  password   = var.identity-provider-db-password
+  depends_on = [kubernetes_stateful_set.postgres-stateful-set]
 }
 
 resource "postgresql_database" "keycloak-database" {
   name  = var.identity-provider-db-name
   owner = var.identity-provider-db-username
   depends_on = [
-    postgresql_role.keycloak-user,
-    kubernetes_stateful_set.postgres-stateful-set
+    postgresql_role.keycloak-user
   ]
 }

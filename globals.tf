@@ -9,7 +9,7 @@ variable "external-domain" {
 }
 
 variable "ingress-class-name" {
-  type = string
+  type    = string
   default = "nginx"
 }
 
