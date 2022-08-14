@@ -53,6 +53,31 @@ variable "gitlab-service-name" {
   default = "gitlab"
 }
 
+variable "gitlab-email" {
+  type      = string
+  sensitive = true
+}
+
+variable "gitlab-email-password" {
+  type      = string
+  sensitive = true
+}
+
+variable "gitlab-email-password-secret-name" {
+  type    = string
+  default = "email-pass"
+}
+
+resource "kubernetes_secret" "gitlab-email-secret" {
+  metadata {
+    name = var.gitlab-email-password-secret-name
+    namespace = var.gitlab-namespace
+  }
+  data = {
+    password = var.gitlab-email-password
+  }
+}
+
 resource "kubernetes_secret" "db-secret" {
   metadata {
     name      = var.gitlab-db-secret-name
@@ -325,6 +350,62 @@ resource "helm_release" "gitlab" {
     value = false
   }
 
+  # Email
+  set {
+    name  = "global.email.display_name"
+    value = "Git"
+  }
+
+  set {
+    name  = "global.email.from"
+    value = "gitlab@kashiuno.com"
+  }
+
+  set {
+    name  = "global.smtp.enabled"
+    value = true
+  }
+
+  set {
+    name  = "global.smtp.address"
+    value = "smtp.yandex.ru"
+  }
+
+  set {
+    name  = "global.smtp.tls"
+    value = true
+  }
+
+  set {
+    name  = "global.smtp.authentication"
+    value = "login"
+  }
+
+  set {
+    name  = "global.smtp.user_name"
+    value = var.gitlab-email
+  }
+
+  set {
+    name  = "global.smtp.password.secret"
+    value = var.gitlab-email-password-secret-name
+  }
+
+  set {
+    name  = "global.smtp.password.key"
+    value = "password"
+  }
+
+  set {
+    name  = "global.smtp.port"
+    value = 465
+  }
+
+  set {
+    name  = "global.smtp.starttls_auto"
+    value = true
+  }
+
   depends_on = [
     minio_user.gitlab-minio-user,
     kubernetes_secret.object-storage-secret,
@@ -333,9 +414,9 @@ resource "helm_release" "gitlab" {
 }
 
 resource "postgresql_role" "gitlab-user" {
-  name       = var.gitlab-db-username
-  login      = true
-  password   = var.gitlab-db-password
+  name     = var.gitlab-db-username
+  login    = true
+  password = var.gitlab-db-password
 }
 
 resource "postgresql_database" "gitlab-database" {
