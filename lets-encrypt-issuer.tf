@@ -61,9 +61,6 @@ resource "kubernetes_manifest" "lets-encrypt-issuer" {
       }
     }
   }
-  depends_on = [
-    helm_release.cert-manager
-  ]
 }
 
 resource "kubernetes_manifest" "lets-encrypt-issuer-staging" {
@@ -94,7 +91,4 @@ resource "kubernetes_manifest" "lets-encrypt-issuer-staging" {
       }
     }
   }
-  depends_on = [
-    helm_release.cert-manager
-  ]
 }
