@@ -139,6 +139,19 @@ resource "kubernetes_stateful_set" "postgres-stateful-set" {
           operator = "Exists"
           effect   = "NoSchedule"
         }
+        affinity {
+          node_affinity {
+            required_during_scheduling_ignored_during_execution {
+              node_selector_term {
+                match_expressions {
+                  key      = "storage"
+                  operator = "In"
+                  values   = [""]
+                }
+              }
+            }
+          }
+        }
       }
     }
     volume_claim_template {
@@ -161,7 +174,6 @@ resource "kubernetes_stateful_set" "postgres-stateful-set" {
     }
   }
   depends_on = [
-    helm_release.nfs-provisioner,
     kubernetes_namespace.database-namespace
   ]
 }
