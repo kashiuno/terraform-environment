@@ -43,6 +43,13 @@ There is a nginx implementation of ingress. Node ports are used for get traffic 
 
 Container runtime - containerd
 
+There is have to be added node with taint - `storage` for stateful sets with pvc.
+Useful labels for nodes - `storage`, `external`. 
+Since exposing of applications happens through NodePort we need to know where deploy ingress controller, because router make port forwarding on this node.
+So we have external label to deploy ingress controller in it.
+Storage label is needed to deploy pods for that taint don't guarantee scheduling.
+
+
 ### Versions
 1. Flannel - 0.14.1 - https://raw.githubusercontent.com/flannel-io/flannel/v0.14.1/Documentation/kube-flannel.yml
 2. kubectl - 1.22.4
