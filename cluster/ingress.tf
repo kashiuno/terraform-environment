@@ -8,18 +8,14 @@ variable "ingress-class-name" {
   default = "nginx"
 }
 
-resource "kubernetes_namespace" "ingress" {
-  metadata {
-    name = var.ingress-namespace
-  }
-}
-
 resource "helm_release" "nginx_ingress" {
   name      = "nginx-ingress-controller"
   namespace = var.ingress-namespace
 
   repository = "https://helm.nginx.com/stable"
   chart      = "nginx-ingress"
+
+  create_namespace = true
 
   set {
     name  = "controller.service.type"
@@ -54,5 +50,20 @@ resource "helm_release" "nginx_ingress" {
   set {
     name  = "controller.config.entries.proxy-buffer-size"
     value = "16k"
+  }
+
+  set {
+    name  = "controller.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key"
+    value = "external"
+  }
+
+  set {
+    name  = "controller.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].operator"
+    value = "In"
+  }
+
+  set {
+    name  = "controller.affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].values[0]"
+    value = ""
   }
 }

@@ -6,6 +6,7 @@ variable "nfs-provisioner-namespace" {
 variable "nfs-host" {
   type = string
 }
+
 variable "nfs-path" {
   type    = string
   default = "/home/data"
@@ -16,18 +17,14 @@ variable "nfs-storage-class-name" {
   default = "main-storage"
 }
 
-resource "kubernetes_namespace" "nfs-provisioner-namespace" {
-  metadata {
-    name = var.nfs-provisioner-namespace
-  }
-}
-
 resource "helm_release" "nfs-provisioner" {
   name      = "nfs-provisioner"
   namespace = var.nfs-provisioner-namespace
 
   repository = "https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner"
   chart      = "nfs-subdir-external-provisioner"
+
+  create_namespace = true
 
   set {
     name  = "nfs.server"
@@ -42,6 +39,36 @@ resource "helm_release" "nfs-provisioner" {
   set {
     name  = "storageClass.name"
     value = var.nfs-storage-class-name
+  }
+
+  set {
+    name  = "affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].key"
+    value = "storage"
+  }
+
+  set {
+    name  = "affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].operator"
+    value = "In"
+  }
+
+  set {
+    name  = "affinity.nodeAffinity.requiredDuringSchedulingIgnoredDuringExecution.nodeSelectorTerms[0].matchExpressions[0].values[0]"
+    value = ""
+  }
+
+  set {
+    name  = "tolerations[0].key"
+    value = "storage"
+  }
+
+  set {
+    name  = "tolerations[0].operator"
+    value = "Exists"
+  }
+
+  set {
+    name  = "tolerations[0].effect"
+    value = "NoSchedule"
   }
 }
 
