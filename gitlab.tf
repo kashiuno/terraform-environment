@@ -467,6 +467,21 @@ resource "helm_release" "gitlab" {
     value = var.gitlab-backups-bucket-name
   }
 
+  set {
+    name  = "gitlab.toolbox.backups.cron.enabled"
+    value = true
+  }
+
+  set {
+    name  = "gitlab.toolbox.backups.cron.schedule"
+    value = "0 0 * * *"
+  }
+
+  set {
+    name  = "gitlab.toolbox.backups.cron.concurrencyPolicy"
+    value = "Replace"
+  }
+
   depends_on = [
     minio_user.gitlab-minio-user,
     kubernetes_secret.object-storage-backups-secret,
