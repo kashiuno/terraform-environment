@@ -83,6 +83,11 @@ variable "gitlab-backups-bucket-secret" {
   sensitive = true
 }
 
+variable "gitlab-backups-bucket-name" {
+  type = string
+  default = "kashiuno-gitlab-backups"
+}
+
 resource "kubernetes_secret" "gitlab-email-secret" {
   metadata {
     name      = var.gitlab-email-password-secret-name
@@ -459,7 +464,7 @@ resource "helm_release" "gitlab" {
 
   set {
     name  = "global.appConfig.backups.bucket"
-    value = "kashiuno-gitlab-backups"
+    value = var.gitlab-backups-bucket-name
   }
 
   depends_on = [
