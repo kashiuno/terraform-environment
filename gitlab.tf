@@ -28,6 +28,11 @@ variable "gitlab-redis-secret-name" {
   default = "redis-secret"
 }
 
+variable "gitlab-object-storage-backups-secret-name" {
+  type    = string
+  default = "object-storage-backups-secret"
+}
+
 variable "gitlab-object-storage-secret-name" {
   type    = string
   default = "object-storage-secret"
@@ -68,9 +73,19 @@ variable "gitlab-email-password-secret-name" {
   default = "email-pass"
 }
 
+variable "gitlab-backups-bucket-key" {
+  type      = string
+  sensitive = true
+}
+
+variable "gitlab-backups-bucket-secret" {
+  type      = string
+  sensitive = true
+}
+
 resource "kubernetes_secret" "gitlab-email-secret" {
   metadata {
-    name = var.gitlab-email-password-secret-name
+    name      = var.gitlab-email-password-secret-name
     namespace = var.gitlab-namespace
   }
   data = {
@@ -98,13 +113,33 @@ resource "kubernetes_secret" "redis-secret" {
   }
 }
 
+resource "kubernetes_secret" "object-storage-backups-secret" {
+  metadata {
+    name      = var.gitlab-object-storage-backups-secret-name
+    namespace = var.gitlab-namespace
+  }
+  data = {
+    s3 = <<EOT
+[default]
+access_key = ${var.gitlab-backups-bucket-key}
+bucket_location = ru-central1
+check_ssl_certificate = True
+check_ssl_hostname = True
+host_base = storage.yandexcloud.net
+host_bucket = %(bucket)s.storage.yandexcloud.net
+secret_key = ${var.gitlab-backups-bucket-secret}
+use_https = True
+EOT
+  }
+}
+
 resource "kubernetes_secret" "object-storage-secret" {
   metadata {
     name      = var.gitlab-object-storage-secret-name
     namespace = var.gitlab-namespace
   }
   data = {
-    connection = jsonencode({
+    connection = yamlencode({
       provider              = "AWS"
       aws_access_key_id     = var.gitlab-minio-username
       aws_secret_access_key = var.gitlab-minio-password
@@ -411,9 +446,25 @@ resource "helm_release" "gitlab" {
     value = true
   }
 
+  # Toolbox
+  set {
+    name  = "gitlab.toolbox.backups.objectStorage.config.secret"
+    value = var.gitlab-object-storage-backups-secret-name
+  }
+
+  set {
+    name  = "gitlab.toolbox.backups.objectStorage.config.key"
+    value = "s3"
+  }
+
+  set {
+    name  = "global.appConfig.backups.bucket"
+    value = "kashiuno-gitlab-backups"
+  }
+
   depends_on = [
     minio_user.gitlab-minio-user,
-    kubernetes_secret.object-storage-secret,
+    kubernetes_secret.object-storage-backups-secret,
     postgresql_database.gitlab-database
   ]
 }
